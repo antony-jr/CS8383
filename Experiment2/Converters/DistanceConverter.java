@@ -1,7 +1,7 @@
 package Converters;
 
 public class DistanceConverter {
-		public static enum DistanceType {
+		public static enum DistanceType{
 			None,
 			M,
 			KM,
@@ -34,7 +34,7 @@ public class DistanceConverter {
 					r = amount/1000;
 					break;
 				case MILES:
-					r = amount/0.63;
+					r = amount/0.62;
 					break;
 				default:
 					r = amount;
