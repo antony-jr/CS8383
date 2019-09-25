@@ -1,6 +1,8 @@
+package Experiment1;
+
 import java.util.Scanner;
 
-class ElectricityBill {
+public class ElectricityBill {
 	private String m_CustomerNo;
 	private String m_CustomerName;
 	private int m_PreviousMonthReading,
@@ -10,7 +12,7 @@ class ElectricityBill {
 		System.out.print(s);
 	}
 
-	ElectricityBill(){
+	public ElectricityBill(){
 		/* Read in values from user. */
 		int units = 0;
 		float payable = 0,
