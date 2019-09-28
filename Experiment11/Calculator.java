@@ -2,64 +2,90 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-class BasicCalculate {
-	double result = 0.0;
-	public static double doOpt(double a, double b, char c){
-		return (c == '-') ? a-b : (c == '+') ? a+b :
-		       (c == '*') ? a*b : (c == '/') ? a/b : 0.0;
-	
-	}
-	public static int priority(char c){
+class StringEvaluate {
+	String result;
+	private int priority(char c){
 		return (c == '-') ? 1 : (c == '+') ? 2 :
 		       (c == '*') ? 3 : (c == '/') ? 4 : -1;
 	}
-	BasicCalculate(String s){
-		Stack<Double> postfix = new Stack<Double>();
-		Stack<Character> opt = new Stack<Character>();
-		String n = new String();
-		for(int iter = 0; iter < s.length(); ++iter){
-			if(Character.isDigit(s.charAt(iter)) || s.charAt(iter) == '.'){
-				n += s.charAt(iter);
-			}else{
-				postfix.push(Double.parseDouble(n));
-				n = new String();
-				try{	
-					char c = opt.peek();
-					if(priority(c) > priority(s.charAt(iter))){
-						c = opt.pop();
-						double b = postfix.pop();
-						double a = postfix.pop();
-						postfix.push(doOpt(a,b,c));
-					}else{
-						opt.push(s.charAt(iter));
-					}
-				}catch(EmptyStackException e){
-					opt.push(s.charAt(iter));	
-				}
-			}	
+	private String doOp(String a, String b, String op){
+		String r;
+		double na = Double.parseDouble(a),
+		       nb = Double.parseDouble(b);
+		switch(op.charAt(0)){
+			case '+':
+				r = "" + (na + nb);
+				break;
+			case '-':
+				r = "" + (na - nb);
+				break;
+			case '*':
+				r = "" + (na * nb);
+				break;
+			case '/':
+				r = "" + (na / nb);
+				break;
+			default:
+				r ="";
+				break;
 		}
-		while(!opt.empty()){
-			try{
-			char c = opt.pop();
-			double b = postfix.pop();
-			double a = postfix.pop();
-			postfix.push(doOpt(a,b,c));
-			}catch(EmptyStackException e){
-				return;
-			}
-			
-		}
-		try{
-			result = postfix.pop();
-		}catch(EmptyStackException e){
-			result = 0.0;
-		}
-	}
-
-	public String toString() {
-		String r = new String();
-		r += result;
 		return r;
+	}
+	StringEvaluate(String s){
+		Stack<String> S = new Stack<String>();
+		ArrayList<String> Postfix = new ArrayList<String>();
+		for(int iter = 0; iter < s.length(); ++iter){
+			char c = s.charAt(iter);
+			if(priority(c) == -1){
+			String operand = new String();
+			while(iter < s.length()){
+				c = s.charAt(iter);
+				if(priority(c) != -1){
+					break;
+				}
+				operand += c;
+				++iter;
+			}
+			iter -= 1;
+			Postfix.add(operand);
+			}else{
+				try{
+				if(priority(S.peek().charAt(0)) > priority(c)){
+					Postfix.add(S.pop());
+				}
+				}catch(EmptyStackException e){
+				}
+				S.push(c + "");
+			}
+		}
+		while(!S.empty()){
+			Postfix.add(S.pop());
+		}
+
+		S = new Stack<String>();
+		for(int iter =0; iter < Postfix.size(); ++iter){
+			String opr = Postfix.get(iter);
+			if(priority(opr.charAt(0)) == -1){
+				S.push(opr);
+			}else{
+				try{
+					String b = S.pop();
+					String a = S.pop();
+					S.push(doOp(a,b,opr));		
+				}catch(EmptyStackException e){
+					result = "ERROR";
+					return;
+				}
+			}
+		}
+		if(S.size() != 1){
+			result = "ERROR";
+			return;
+		}
+		result = S.pop();
+	}
+	public String toString(){
+		return result;
 	}
 }
 
@@ -73,6 +99,8 @@ public class Calculator extends Frame implements ActionListener {
 	TextField display;
 	String data;
 
+	int opt = -1;
+	String oper1, oper2;
 	private String toBasicOpt(int n){
 		if(n == 0){
 			return "-";
@@ -107,6 +135,9 @@ public class Calculator extends Frame implements ActionListener {
 		super("Calculator");
 		setSize(500,500);
 		setLayout(new BorderLayout());
+
+		oper1 = new String();
+		oper2 = new String();
 
 		p = new Panel();
 		p.setLayout(new GridLayout(0,4));
@@ -167,19 +198,26 @@ public class Calculator extends Frame implements ActionListener {
 		
 		if(cmd.charAt(0) == 'n'){
 			data += cmd.charAt(1);
+			if(opt == -1){
+			oper1 += cmd.charAt(1);
+			}else{
+			oper2 += cmd.charAt(1);
+			}
 			display.setText(data);
 		}else if(cmd.charAt(0) == 'b' && cmd.charAt(1) == 'o'){
 			int opt = Character.getNumericValue(cmd.charAt(2));
 			if(opt == 4){
-			        data = "" + (new BasicCalculate(data));
+				data = "" + (new StringEvaluate(data));
 				display.setText(data);
 				return;
 			}
 			data += toBasicOpt(opt);;
+			this.opt = opt;
 			display.setText(data);
 		}else if(cmd.charAt(0) == 'a' && cmd.charAt(1) == 'o'){
 			int opt = Character.getNumericValue(cmd.charAt(2)); 
-			double value = Double.parseDouble("" + (new BasicCalculate(data)));
+			data = "" + (new StringEvaluate(data));
+			double value = Double.parseDouble(data);
 			if(opt == 0){
 				data = "" + Math.sin(value);
 			}else if(opt == 1){
