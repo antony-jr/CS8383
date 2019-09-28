@@ -5,12 +5,13 @@ class RandomGen {
 	private Random rnd;
 	int n = 0;
 
-	RandomGen(int endRange){
-		rnd = new Random(endRange);
+	RandomGen(){
+		rnd = new Random();
 	}
 
 	synchronized void generate(){
-		n = rnd.nextInt();
+		n = rnd.nextInt(1000);
+		System.out.println("Generated Number: " + n);
 		notifyAll();
 	}
 
@@ -26,7 +27,7 @@ class RandomGen {
 
 public class RandomNumbers {
 	public static void main(String [] args){
-		RandomGen r = new RandomGen(1000);
+		RandomGen r = new RandomGen();
 
 		/* first thread generates randome number every one sec. */
 		new Thread(){
@@ -48,7 +49,7 @@ public class RandomNumbers {
 				while(true){
 					int v = r.getRnd();
 					if(v % 2 == 0){
-						System.out.println("Square of Random No. : " + v*v);
+						System.out.println("Square of Random No. : " + (v*v));
 					}
 				}
 			}
@@ -60,7 +61,7 @@ public class RandomNumbers {
 				while(true){
 					int v = r.getRnd();
 					if(v % 2 != 0){
-						System.out.println("Cube of Random No. : " + v*v);
+						System.out.println("Cube of Random No. : " + (v*v*v));
 					}
 				}
 			}
