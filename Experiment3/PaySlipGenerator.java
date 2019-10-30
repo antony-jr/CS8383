@@ -1,5 +1,3 @@
-package Experiment3;
-
 import PaySlip.*;
 import java.util.Scanner;
 
